@@ -8,8 +8,8 @@ Usage is as follows:
 "python craigScrape.py \<location\> \<category\> \<query\> \<maxprice\> \<numproducts\>"
 
 Where:
-  location is a craigslist city option (ie "sacramento")
-  category is the craigslist sectionthat you would like to search in (ie "sporting-goods")
-  query is the search; it's best to keep this simple because it scrapes for matching words (ie "bicycle")
-  maxprice is the highest price that will be included in the search
-  numproducts is the max number of items shown in your search
+  - location is a craigslist city option (ie "sacramento")
+  - category is the craigslist sectionthat you would like to search in (ie "sporting-goods")
+  - query is the search; it's best to keep this simple because it scrapes for matching words (ie "bicycle")
+  - maxprice is the highest price that will be included in the search
+  - numproducts is the max number of items shown in your search
