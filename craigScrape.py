@@ -6,13 +6,23 @@ from urllib.request import urlopen
 import sys
 import csv
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email import encoders
-from email.mime.base import MIMEBase
+#from email.mime.multipart import MIMEMultipart
+#from email.mime.text import MIMEText
+#from email import encoders
+#from email.mime.base import MIMEBase
 
-site = 'https://chico.craigslist.org/d/sporting-goods/search/sga?s='
-html = urlopen(site)
+#verify command line args
+if len(sys.argv) != 5:
+  print("Error: usage \"craigScrape.py <location> <query> <maxprice> <numproducts>\"")
+  exit(1)
+location = str(sys.argv[1]).lower().strip()
+category = str(sys.argv[2]).lower().strip()
+query = str(sys.argv[3]).lower()
+maxp = int(sys.argv[4])
+nump = int(sys.argv[5])
+
+dsite = 'https://'+location+'.craigslist.org/d/'+category+'/search/sga?s='
+html = urlopen(dsite)
 file = open("pid.txt", "a")
 soup = BeautifulSoup(html, "html5lib")
 
@@ -21,20 +31,12 @@ total = soup.find("span", class_="totalcount")
 total = ''.join(filter(lambda i: i.isdigit(), total))
 total = int(total)
 
-#verify command line args
-if len(sys.argv) != 4:
-  print("Error: usage \"craigScrape.py <query> <maxprice> <numproducts>\"")
-  exit(1)
-query = str(sys.argv[1]).lower()
-maxp = int(sys.argv[2])
-nump = int(sys.argv[3])
-
 #gather all data
 prices = []
 names = []
 idx = 0
 while idx < total:
-  site = 'https://chico.craigslist.org/d/sporting-goods/search/sga?s='+str(idx)
+  site = dsite + str(idx)
   html = urlopen(site)
   file = open("pid.txt", "a")
   soup = BeautifulSoup(html, "html5lib")
@@ -61,7 +63,7 @@ while idx < len(names):
   namestr = names[idx].lower()
   if namestr.find(query) >= 0:
     if prices[idx] <= maxp:
-      sublist = [names[idx], prices[idx], 'Chico']
+      sublist = [names[idx], prices[idx], str(sys.argv[1])]
       #insert in ascending order by price
       if len(results) == 0:
         results.append(sublist)
@@ -89,8 +91,8 @@ csvfile = '/scrapeData.csv'
 csvfile = os.getcwd() + csvfile
 os.system('touch ' + csvfile)
 
-#check if top 5 changed, for email
-email = 0
+#check if top 5 changed, for update
+update = 0
 olddata = []
 with open(csvfile, newline='') as fd:
   reader = csv.reader(fd)
@@ -100,46 +102,49 @@ if len(olddata)-1 == len(shortresults):
   if len(shortresults) > 0:
     idx = 0
     while idx < len(shortresults) and idx < 5:
-      #set email flag if there is a difference
+      #set update flag if there is a difference
       if olddata[idx+1] != shortresults[idx]:
-        email = 1
+        update = 1
         break
       idx = idx+1
-#set email flag if list sizes don't match
+#set update flag if list sizes don't match
 else:
-  email = 1
+  update = 1
 
 #create csv
-fields = ['Title', 'Price', 'City']
+fields = ['Title', 'Price', 'Location']
 with open(csvfile, 'w') as fd:
   write = csv.writer(fd)
   write.writerow(fields)
   write.writerows(shortresults)
 
-#create and send email if necessary
-if email == 1:
-  msg = MIMEMultipart()
-  msg['From'] = 'connor.richards899@gmail.com'
-  msg['To'] = 'makingthings3@gmail.com'
-  msg['Subject'] = 'Python: Your Craiglist listings updated'
+#old ** create and send email if necessary
+#update if necessary
+if update == 1:
+  print("Change Detected: File Updated")
 
-  message = 'There was a change in the top 5 listings of your search.\nThe new file has been attached.'
-  msg.attach(MIMEText(message))
+  #msg = MIMEMultipart()
+  #msg['From'] = '*** sender email ***'
+  #msg['To'] = '*** receiving email ***'
+  #msg['Subject'] = 'Python: Your Craiglist listings updated'
 
-  part = MIMEBase('application', "octet-stream")
-  part.set_payload(open(csvfile, "rb").read())
-  encoders.encode_base64(part)
-  part.add_header('Content-Disposition', 'attachment; filename="scrapeData.csv"')
-  msg.attach(part)
+  #message = 'There was a change in the top 5 listings of your search.\nThe new file has been attached.'
+  #msg.attach(MIMEText(message))
 
-  mailserver = smtplib.SMTP('smtp.gmail.com', 587)
-  mailserver.ehlo()
-  mailserver.starttls()
-  mailserver.ehlo()
-  mailserver.login('connor.richards899@gmail.com', 'wtkmarpefpzslsex')
-  mailserver.sendmail('connor.richards899@gmail.com', 'makingthings3@gmail.com', msg.as_string())
-  mailserver.quit()
+  #part = MIMEBase('application', "octet-stream")
+  #part.set_payload(open(csvfile, "rb").read())
+  #encoders.encode_base64(part)
+  #part.add_header('Content-Disposition', 'attachment; filename="scrapeData.csv"')
+  #msg.attach(part)
 
-  print("Change Detected: Email Sent")
+  #mailserver = smtplib.SMTP('smtp.gmail.com', 587)
+  #mailserver.ehlo()
+  #mailserver.starttls()
+  #mailserver.ehlo()
+  #mailserver.login('*** sender email ***', '*** app password ***')
+  #mailserver.sendmail('*** sender email ***', '*** receiving email ***', msg.as_string())
+  #mailserver.quit()
+
+  #print("Change Detected: Email Sent")
 else:
   print("NO Change Detected")
