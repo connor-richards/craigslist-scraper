@@ -5,6 +5,6 @@ Results are returned in ascending order based on listing price.
 May include commented out code to send a notifying email with new csv file in the event of a results change. Useful for regular execution with cron.
 
 Usage is as follows:
-"craigScrape.py <location> <query> <maxprice> <numproducts>"
+"python craigScrape.py <location> <category> <query> <maxprice> <numproducts>"
 
-Where location is a craigslist city option (ie "sacramento"), query is the search (ie "bicycle wheels"), maxprice is the highest price that will be included in the search, numproducts is the max number of items shown in your search.
+Where location is a craigslist city option (ie "sacramento"), category is the craigslist sectionthat you would like to search in (ie "sporting-goods"), query is the search; it's best to keep this simple because it scrapes for matching words (ie "bicycle"), maxprice is the highest price that will be included in the search, numproducts is the max number of items shown in your search.

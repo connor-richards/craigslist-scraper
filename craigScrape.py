@@ -12,8 +12,8 @@ import smtplib
 #from email.mime.base import MIMEBase
 
 #verify command line args
-if len(sys.argv) != 5:
-  print("Error: usage \"craigScrape.py <location> <query> <maxprice> <numproducts>\"")
+if len(sys.argv) != 6:
+  print("Error: usage \"python craigScrape.py <location> <category> <query> <maxprice> <numproducts>\"")
   exit(1)
 location = str(sys.argv[1]).lower().strip()
 category = str(sys.argv[2]).lower().strip()
@@ -94,7 +94,7 @@ os.system('touch ' + csvfile)
 #check if top 5 changed, for update
 update = 0
 olddata = []
-with open(csvfile, newline='') as fd:
+with open(csvfile, newline='', encoding='utf-8') as fd:
   reader = csv.reader(fd)
   olddata = list(reader)
 #compare first 5 if list sizes match
@@ -113,7 +113,7 @@ else:
 
 #create csv
 fields = ['Title', 'Price', 'Location']
-with open(csvfile, 'w') as fd:
+with open(csvfile, 'w', encoding='utf-8') as fd:
   write = csv.writer(fd)
   write.writerow(fields)
   write.writerows(shortresults)
